@@ -50,6 +50,23 @@ def delete(id):
     except:
         return 'Deleting didnt work :( '
 
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+def update(id):
+    # Attempt to get task by id or 404 if it doesn't exist
+    task = Todo.query.get_or_404(id)
+
+    if request.method == 'POST':
+        # Setting above tasks content to the content in the update input field
+        task.content = request.form['content']
+
+        try:
+            db.session.commit()
+            return redirect('/')
+        except:
+            return 'Updating didnt work :( '
+    else:
+        return render_template('update.html', task=task)
+
 if __name__ == "__main__":
     # If theres any errors they'll pop up on the page
     app.run(debug=True)
