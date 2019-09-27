@@ -17,7 +17,7 @@ class Todo(db.Model):
         return '<Task %r>' % self.id
 
 # Index route so when I browse to the url it doesn't 404
-@app.route('/')
+@app.route('/', methods=['Post', 'GET'])
 def index():
     return render_template('index.html')
 
