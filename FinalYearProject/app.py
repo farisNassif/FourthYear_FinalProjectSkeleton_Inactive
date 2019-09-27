@@ -1,10 +1,10 @@
-from flask import flask
+from flask import Flask
 
-app = flask(__name__)
+app = Flask(__name__)
 
 # Index route so when I browse to the url it doesn't 404
 
-@app.route('/dad')
+@app.route('/')
 def index():
     return "Hello World"
 
