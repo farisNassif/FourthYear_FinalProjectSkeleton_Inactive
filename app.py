@@ -1,11 +1,19 @@
-from flask import Flask, render_template, url_for, request, redirect
+import pymongo
+from pymongo import MongoClient
+from flask import Flask, render_template, url_for, request, redirect, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+cluster = MongoClient("mongodb+srv://faris:loughrea@skeletonforproject-a2j6y.mongodb.net/test?retryWrites=true&w=majority")
+
 app = Flask(__name__)
+
 # Where the database is located
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
+db2 = cluster["testdb"]
+collection = db2["testcollection"]
+
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -23,8 +31,10 @@ def index():
     if request.method == 'POST':
         task_content = request.form['content']
         new_task = Todo(content=task_content)
-
+        postForCollection = {"content":request.form['content'],"date":datetime.now()}
+        collection.insert_one(postForCollection)
         try:
+            
             db.session.add(new_task)
             db.session.commit()
             return redirect('/')
@@ -63,7 +73,7 @@ def update(id):
             db.session.commit()
             return redirect('/')
         except:
-            return 'Updating didnt work :( '
+            return 'Updating didnt work :('
     else:
         return render_template('update.html', task=task)
 
