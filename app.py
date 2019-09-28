@@ -31,17 +31,18 @@ def index():
     # Whenever someone wants to add some input 
     if request.method == 'POST':
         # Preparing data to be inserted into SQLite
-        task_content = request.form['content']
+        # task_content = request.form['content']
         # Assigning everything in the Schema for SQLite to new_task. id and date_created don't require input so 'content' only needs passing.
-        new_task = Todo(content=task_content)
+        ## new_task = Todo(content=task_content)
+
         # Preparing data to be inserted into mongo
-        postForCollection = {"content":request.form['content'],"date":datetime.now()}
+        postForCollection = {"content":request.form['content'],"date_created":datetime.now()}
         try:        
             # Posting data stored above to mongo
             collection.insert_one(postForCollection)
             # Data below is stored in SQL
-            db.session.add(new_task)
-            db.session.commit()
+            # db.session.add(new_task)
+            # db.session.commit()
             # Once above commits are made return back to index page
             return redirect('/')
         # Error Handling
@@ -50,9 +51,13 @@ def index():
             return 'Issue adding input'
     else:
         # Looks at database contents in order they were created and show all of them
-        tasks = Todo.query.order_by(Todo.date_created).all()
+
+        # Retrieving Mongo data and putting it in a list
+        mongoData = list(collection.find())
+        # tasks = Todo.query.order_by(Todo.date_created).all()
+        # print(tasks)
         # Base Page
-        return render_template('index.html', tasks=tasks)
+        return render_template('index.html', tasks=mongoData)
 
 # Delete route, delete by id
 @app.route('/delete/<int:id>')
@@ -60,8 +65,10 @@ def delete(id):
     # Attempt to get task by id or 404 if it doesn't exist
     task_to_delete = Todo.query.get_or_404(id)
     try: 
+        # myquery = { "content": "ggg" }
         db.session.delete(task_to_delete)
         db.session.commit()
+        # collection.delete_one(myquery)
         return redirect('/')
     except:
         return 'Deleting didnt work :( '
@@ -70,7 +77,7 @@ def delete(id):
 def update(id):
     # Attempt to get task by id or 404 if it doesn't exist
     task = Todo.query.get_or_404(id)
-    
+
     if request.method == 'POST':
         # Setting above tasks content to the content in the update input field
         task.content = request.form['content']
