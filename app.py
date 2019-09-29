@@ -35,33 +35,30 @@ def index():
         # Base Page
         return render_template('index.html', tasks=mongoData)
 
-# Delete route, delete by id
+# Delete route, remove from MongoDB by id
 @app.route('/delete/<string:_id>')
 def delete(_id):
-    # Attempt to get task by id or 404 if it doesn't exist
     try: 
-        print(_id)
-        # collection.delete_one(entryToDelete)
-        collection.remove( {'_id': ObjectId(_id) } ) 
+        collection.delete_one( {'_id': ObjectId(_id) } ) 
         return redirect('/')
     except:
         return 'Deleting didnt work :( '
 
-@app.route('/update/<int:id>', methods=['GET', 'POST'])
-def update(id):
-    # Attempt to get task by id or 404 if it doesn't exist
-    # task = Todo.query.get_or_404(id)
-
+@app.route('/update/<string:_id>', methods=['GET', 'POST'])
+def update(_id):
+    # Finding the record the user wants to update and storing the object in recordToEdit
+    recordToEdit = collection.find_one( {'_id': ObjectId(_id) } )
     if request.method == 'POST':
-        # Setting above tasks content to the content in the update input field
-        task.content = request.form['content']
+        # userUpdate is whatever the person enters on the input page
+        userUpdate = request.form['content']
         try:
-            db.session.commit()
+            # Update by id, insert newly input data
+            collection.update_one({ "_id": ObjectId(_id) }, { "$set": { "content": userUpdate } } )
             return redirect('/')
         except:
             return 'Updating didnt work :('
     else:
-        return render_template('update.html', task=task)
+        return render_template('update.html', task=recordToEdit)
 
 if __name__ == "__main__":
     # If theres any errors they'll pop up on the page
