@@ -19,7 +19,7 @@ def index():
     # Whenever someone wants to submit
     if request.method == 'POST':
         # Preparing data to be inserted into mongo
-        postForCollection = {"content":request.form['content'],"date_created":datetime.now()}
+        postForCollection = {"content":request.form['content'],"date_created":datetime.now().replace(microsecond=0)}
         try:        
             # Posting data stored above to mongo
             collection.insert_one(postForCollection)
@@ -31,7 +31,7 @@ def index():
             return 'Issue adding input'
     else:
         # Retrieving Mongo data and putting it in a list
-        mongoData = list(collection.find())
+        mongoData = list(collection.find().sort('date_created', pymongo.ASCENDING))
         # Base Page
         return render_template('index.html', tasks=mongoData)
 
